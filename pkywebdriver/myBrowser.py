@@ -174,7 +174,8 @@ class MyBrowser(baseChrome.BaseChrome):
         item = []
         klist = []
         root  = soup.find('ul', class_="srp-results")
-        items = root.find_all("div", {"class": "s-item__image-section"})
+        #items = root.find_all("div", {"class": "s-item__image-section"})
+        items = root.find_all("div", {"class": "su-card-container__header"})
         for i, itm in enumerate(items, start=1):
             try:
               href = itm.find('a').get('href')
@@ -211,14 +212,15 @@ class MyBrowser(baseChrome.BaseChrome):
             item_url = 'https://www.ebay.com/itm/' + id
             print(item_url)
             try:
-                link = driver.find_element('css selector','a[href^="' + item_url + '"]')
+                #link = driver.find_element('css selector','a[href^="' + item_url + '"]')
+                link = driver.find_element('css selector','.su-card-container__content a[href^="' + item_url + '"]')
             
                 if link.is_displayed():
                     driver.execute_script("arguments[0].scrollIntoView();", link)
+                    link2 = driver.find_element('css selector','.su-card-container__content a[href^="' + item_url + '"]')
                     #input('scrollIntoView?')
-                    link2 = driver.find_elements('css selector','a[href^="' + item_url + '"]')[1]
+                    #link2 = driver.find_elements('css selector','a[href^="' + item_url + '"]')[1]
                     link2.send_keys('')
-                    #input('select?')
                     link2.click()
                     #print('wait 3 seconds...')
                     sleep(3)

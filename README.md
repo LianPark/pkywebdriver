@@ -33,5 +33,5 @@ python ebay-rank.py
 
 git add .
 git commit -m 
-git tag 설정필요
-git push
+git tag v0.0.1
+git push origin tag

@@ -96,6 +96,8 @@ class BaseFirefox(basicBrowser.BasicBrowser):
           options = webdriver.FirefoxOptions()
           self.driver = webdriver.Firefox(service=service, options=options)
         else:
+          # Window Driver Location: C:\Users\[Username]\.wdm\drivers\geckodriver
+          # Linux Location: ~/.wdm/drivers/geckodriver
           service = Service(GeckoDriverManager().install())
           self.driver = webdriver.Firefox(service=service, options=self.options)
 

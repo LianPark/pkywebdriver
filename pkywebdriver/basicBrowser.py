@@ -118,6 +118,18 @@ class BasicBrowser():
         self.page_loading_completed(self.driver)
 
 
+    def full_page_screen(self, filename):
+        """ 전체페이지 스크린샷 """
+        
+        self.driver.save_full_page_screenshot(filename)
+
+
+    def save_screen(self, filename):
+        """ 보여지는 부분만 스크린샷 """
+        
+        self.driver.save_screenshot(filename)
+
+
     def click_link(self, element):
         
         element.click()

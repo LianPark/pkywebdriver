@@ -41,11 +41,10 @@ class BaseChrome(basicBrowser.BasicBrowser):
 
     def __init__(self, config):
 
-        self.driver    = None
-        self.headless  = config['headless']
+        self.headless   = config['headless']
         self.user_agent = None
-        self.profile   = config['profile']
-        self.extension = config['extension']
+        self.profile    = config['profile']
+        self.extension  = config['extension']
         if 'proxy' in config:
             self.proxy = config['proxy']
         else:

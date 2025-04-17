@@ -175,7 +175,10 @@ class MyBrowser(baseFirefox.BaseFirefox):
         item = []
         klist = []
         root  = soup.find('ul', class_="srp-results")
-        items = root.find_all("div", {"class": "s-item__image-section"})
+        if self.check_exists_by_xpath('.su-card-container__header','css_selector'):
+            items = root.find_all("div", {"class": "su-card-container__header"})
+        else:
+            items = root.find_all("div", {"class": "s-item__image-section"})
         for i, itm in enumerate(items, start=1):
             try:
               href = itm.find('a').get('href')
@@ -193,6 +196,7 @@ class MyBrowser(baseFirefox.BaseFirefox):
             for mi in myitems:    		
                 if itno.group(1) == mi:
                     log.info('Rank: {}\t{}\t({})'.format(keyword, mi, i))
+                    print('Rank: {}\t{}\t({})'.format(keyword, mi, i))
                     klist.append([keyword, mi, i])
                     sleep(1)
         f.close()
@@ -210,12 +214,18 @@ class MyBrowser(baseFirefox.BaseFirefox):
             item_url = 'https://www.ebay.com/itm/' + id
             print(item_url)
             try:
-                link = driver.find_element('css selector','a[href^="' + item_url + '"]')
+                if self.check_exists_by_xpath('.su-card-container__header','css_selector'):
+                  link = driver.find_element('css selector','.su-card-container__content a[href^="' + item_url + '"]')
+                else:
+                  link = driver.find_element('css selector','a[href^="' + item_url + '"]')
             
                 if link.is_displayed():
                     #driver.execute_script("arguments[0].scrollIntoView();", link)
                     self.scroll_into_view(link)
-                    link2 = driver.find_elements('css selector','a[href^="' + item_url + '"]')[1]
+                    if self.check_exists_by_xpath('.su-card-container__header','css_selector'):
+                      link2 = driver.find_element('css selector','.su-card-container__content a[href^="' + item_url + '"]')
+                    else:
+                      link2 = driver.find_elements('css selector','a[href^="' + item_url + '"]')[1]
                     link2.send_keys('')
                     link2.click()
                     sleep(3)

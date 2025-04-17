@@ -91,15 +91,17 @@ class BaseFirefox(basicBrowser.BasicBrowser):
         #temp_dir = '/home/ubuntu/.mozilla/firefox/3uz1obam.default'
         #service = Service(GeckoDriverManager().install(),  service_args=['--profile-root', temp_dir])
 
-        if os.name == 'nt':
-          self.driver = webdriver.Firefox(options=self.options)
+        if os.name == 'nt2':
+          service = Service(executable_path="./geckodriver.exe")
+          options = webdriver.FirefoxOptions()
+          self.driver = webdriver.Firefox(service=service, options=options)
         else:
           service = Service(GeckoDriverManager().install())
-          self.driver = webdriver.Firefox(service=service, options=self.options)        
+          self.driver = webdriver.Firefox(service=service, options=self.options)
 
         # selenium 4용
         if self.extension:
-            driver.install_addon(r'/home/ubuntu/extension/browser@tunnelbear.com.xpi')
+            self.driver.install_addon(r'/home/ubuntu/extension/browser@tunnelbear.com.xpi')
 
         return self.driver
   

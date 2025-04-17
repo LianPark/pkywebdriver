@@ -118,6 +118,15 @@ class MyBrowser(baseChrome.BaseChrome):
         except NoSuchElementException:
             pass
 
+        # try:
+        #     if driver.find_element('xpath','//span[@class="tourtip__overlay"]'):
+        #         print("Tooltip Element exists : tourtip__overlay")
+        #         sleep(2)
+        #         tooltip = driver.find_element('xpath','//span[@class="tourtip__overlay"]//button')
+        #         tooltip.click()
+        # except NoSuchElementException:
+        #     pass
+
  
         ## HTML 페이지 저장
         with open('page.txt', 'w', encoding='utf-8') as f:
@@ -174,8 +183,10 @@ class MyBrowser(baseChrome.BaseChrome):
         item = []
         klist = []
         root  = soup.find('ul', class_="srp-results")
-        #items = root.find_all("div", {"class": "s-item__image-section"})
-        items = root.find_all("div", {"class": "su-card-container__header"})
+        if self.check_exists_by_xpath('.su-card-container__header','css_selector'):
+            items = root.find_all("div", {"class": "su-card-container__header"})
+        else:
+            items = root.find_all("div", {"class": "s-item__image-section"})
         for i, itm in enumerate(items, start=1):
             try:
               href = itm.find('a').get('href')
@@ -193,6 +204,7 @@ class MyBrowser(baseChrome.BaseChrome):
             for mi in myitems:    		
                 if itno.group(1) == mi:
                     log.info('Rank: {}\t{}\t({})'.format(keyword, mi, i))
+                    print('Rank: {}\t{}\t({})'.format(keyword, mi, i))
                     klist.append([keyword, mi, i])
                     sleep(1)
                 #else:
@@ -212,15 +224,20 @@ class MyBrowser(baseChrome.BaseChrome):
             item_url = 'https://www.ebay.com/itm/' + id
             print(item_url)
             try:
-                #link = driver.find_element('css selector','a[href^="' + item_url + '"]')
-                link = driver.find_element('css selector','.su-card-container__content a[href^="' + item_url + '"]')
+                if self.check_exists_by_xpath('.su-card-container__header','css_selector'):
+                  link = driver.find_element('css selector','.su-card-container__content a[href^="' + item_url + '"]')
+                else:
+                  link = driver.find_element('css selector','a[href^="' + item_url + '"]')
+                #print(f'link={link}')
             
                 if link.is_displayed():
                     driver.execute_script("arguments[0].scrollIntoView();", link)
-                    link2 = driver.find_element('css selector','.su-card-container__content a[href^="' + item_url + '"]')
-                    #input('scrollIntoView?')
-                    #link2 = driver.find_elements('css selector','a[href^="' + item_url + '"]')[1]
+                    if self.check_exists_by_xpath('.su-card-container__header','css_selector'):
+                      link2 = driver.find_element('css selector','.su-card-container__content a[href^="' + item_url + '"]')
+                    else:
+                      link2 = driver.find_elements('css selector','a[href^="' + item_url + '"]')[1]
                     link2.send_keys('')
+                    #print('scrollIntoView')
                     link2.click()
                     #print('wait 3 seconds...')
                     sleep(3)

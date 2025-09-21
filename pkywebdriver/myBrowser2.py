@@ -62,6 +62,7 @@ class MyBrowser(baseFirefox.BaseFirefox):
     def execute(self, driver, keyword, itemIDList):
 
         log.info('정보 => {}, {}'.format(keyword, itemIDList))
+        
 
         #driver = self.driver
 
@@ -78,7 +79,8 @@ class MyBrowser(baseFirefox.BaseFirefox):
         
         
         ## Move to Search Box
-        #log.debug(">>> Search Box 이동")
+        print(">>> Search Box 이동")
+        #driver.execute_script("window.scrollTo(0, document.body.scrollTop);")        
         sleep(1)
         search_box = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//input[@id="gh-ac"]')))
         search_box.clear()
@@ -86,7 +88,7 @@ class MyBrowser(baseFirefox.BaseFirefox):
         #search_box.send_keys(Keys.RETURN)
         
         ## Click Search Button
-        log.debug('>>> Search Button 클릭')
+        print('>>> Search Button 클릭')
         sleep(1)
         if self.check_exists_by_xpath('//input[@id="gh-btn"]'):
           btn_search = driver.find_element('xpath','//input[@id="gh-btn"]')
@@ -121,7 +123,7 @@ class MyBrowser(baseFirefox.BaseFirefox):
         #with open('page.txt', 'w', encoding='utf-8') as f:
         #    f.write(self.driver.page_source)
         
-        ## itemID 찾기
+        ## itemID 찾기        
         log.info('>>> Search ItemID...')
         soup = BeautifulSoup(self.driver.page_source, "html.parser")
         klist = self.get_itemid(soup, keyword, itemIDList)
@@ -159,6 +161,7 @@ class MyBrowser(baseFirefox.BaseFirefox):
 
         driver.switch_to.window(main_window)
         #log.info('Successfully Completed!!!')
+        self.scroll_to_top()
         
         return klist
         
@@ -172,22 +175,28 @@ class MyBrowser(baseFirefox.BaseFirefox):
             myitems: 내아이템 id
         """
         
-        item = []
+        item  = []
         klist = []
-        root  = soup.find('ul', class_="srp-results")
-        if self.check_exists_by_xpath('.su-card-container__header','css_selector'):
-            items = root.find_all("div", {"class": "su-card-container__header"})
-        else:
-            items = root.find_all("div", {"class": "s-item__image-section"})
+        root  = soup.find('ul', class_="srp-results") #ul.srp-results        
+        # if self.check_exists_by_xpath('.su-card-container__header','css_selector'):
+        #     items = root.find_all("div", {"class": "su-card-container__header"})
+        # else:
+        #     items = root.find_all("div", {"class": "s-item__image-section"})
+        items = root.select('li.s-item a.s-item__link')
         for i, itm in enumerate(items, start=1):
-            try:
-              href = itm.find('a').get('href')
+            #print('itm=',itm ,len(itm))
+            try:              
+              #href = itm.find('a').get('href')
+              href = itm.get('href')
               item.append(href)
             except Exception as e:
               pass
 
         #item = [ m.find('a').get('href') for m in root.find_all("div", {"class": "s-item__image-section"}) ]
-        #print(item ,len(item))
+        # print('ITEM=',item ,len(item))
+        # with open('test.log', 'w', encoding='utf-8') as f:
+        #     f.write(str(item))
+
 
         f = open('item.txt','a',encoding='utf-8')
         for i, id in enumerate(item, start=1):
@@ -200,7 +209,8 @@ class MyBrowser(baseFirefox.BaseFirefox):
                     klist.append([keyword, mi, i])
                     sleep(1)
         f.close()
-        
+        print('KLIST=',klist ,len(klist))
+
         return klist
 
         
@@ -214,21 +224,21 @@ class MyBrowser(baseFirefox.BaseFirefox):
             item_url = 'https://www.ebay.com/itm/' + id
             print(item_url)
             try:
-                if self.check_exists_by_xpath('.su-card-container__header','css_selector'):
-                  link = driver.find_element('css selector','.su-card-container__content a[href^="' + item_url + '"]')
-                else:
-                  link = driver.find_element('css selector','a[href^="' + item_url + '"]')
+                # if self.check_exists_by_xpath('.su-card-container__header','css_selector'):
+                #   link = driver.find_element('css selector','.su-card-container__content a[href^="' + item_url + '"]')
+                # else:
+                #   link = driver.find_element('css selector','a[href^="' + item_url + '"]')
             
+                link = driver.find_element('css selector','ul.srp-results li.s-item div.s-item__info a[href^="' + item_url + '"]')
                 if link.is_displayed():
-                    #driver.execute_script("arguments[0].scrollIntoView();", link)
                     self.scroll_into_view(link)
-                    if self.check_exists_by_xpath('.su-card-container__header','css_selector'):
-                      link2 = driver.find_element('css selector','.su-card-container__content a[href^="' + item_url + '"]')
-                    else:
-                      link2 = driver.find_elements('css selector','a[href^="' + item_url + '"]')[1]
-                    link2.send_keys('')
-                    link2.click()
-                    sleep(3)
+                    # if self.check_exists_by_xpath('.su-card-container__header','css_selector'):
+                    #   link2 = driver.find_element('css selector','.su-card-container__content a[href^="' + item_url + '"]')
+                    # else:
+                    #   link2 = driver.find_elements('css selector','a[href^="' + item_url + '"]')[1]
+                    link.send_keys('')
+                    link.click()
+                    sleep(5)
             
             except Exception as e:
                 log.error('%s %s' % (sys.exc_info()[0], sys.exc_info()[1]) )

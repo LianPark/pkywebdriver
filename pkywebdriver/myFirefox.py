@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
 #=====================================================================
-제목: 이베이 내상품 자동클릭
+제목: FireFox 브라우저 동작 실현
 버전: v0.1
 날짜: 2021-12-13
 설명: 조회수 또는 상품을 상단에 배치하기 위해서는 많은 클릭이 필요
@@ -15,7 +15,7 @@ from time import sleep, time
 import argparse
 import random
 
-from . import baseChrome
+from . import baseFirefox
 
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
@@ -23,6 +23,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.ui import Select
 
 import logging
 from .LIB import logger
@@ -34,16 +35,18 @@ log = logging.getLogger(__name__)
 log.info(f"Logging Started... {__name__}")
 
 
-class MyBrowser(baseChrome.BaseChrome):
+class MyBrowser(baseFirefox.BaseFirefox):
 
     def __init__(self, config):
         
         super().__init__(config)
+        self.isSort = True
+        
 
-
-    def run(self, driver, keyword, itemIDList):
+    def execute(self, driver, keyword, itemIDList, sort=False):
 
         log.info('정보 => {}, {}'.format(keyword, itemIDList))
+        
 
         #driver = self.driver
 
@@ -60,23 +63,22 @@ class MyBrowser(baseChrome.BaseChrome):
         
         
         ## Move to Search Box
-        #log.debug(">>> Search Box 이동")
+        #print(">>> Search Box 이동")
+        #driver.execute_script("window.scrollTo(0, document.body.scrollTop);")        
         sleep(1)
         search_box = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//input[@id="gh-ac"]')))
         search_box.clear()
         search_box.send_keys(keyword)
         #search_box.send_keys(Keys.RETURN)
-
         
         ## Click Search Button
-        log.debug('>>> Search Button 클릭')
-        sleep(1)
+        print('>>> Search Button 클릭')
+        sleep(2)
         if self.check_exists_by_xpath('//input[@id="gh-btn"]'):
           btn_search = driver.find_element('xpath','//input[@id="gh-btn"]')
         else:
           btn_search = driver.find_element('xpath','//button[@id="gh-search-btn"]')
         	
-        #btn_search = driver.find_element('xpath','//input[@id="gh-btn"]')
         ActionChains(driver).move_to_element(btn_search).click().perform()
         sleep(2)
         self.page_loading_completed(driver)
@@ -86,9 +88,12 @@ class MyBrowser(baseChrome.BaseChrome):
             pass
 
         ## Sorting Box
-        #self.select_sorting(driver)
-        #sleep(2)
-        #self.page_loading_completed(driver)
+        if sort and self.isSort:
+          print('>>> sorting items ...')
+          self.select_sorting(driver)
+          sleep(2)
+          self.isSort = False
+          self.page_loading_completed(driver)
         
         ## 가끔 툴팁이 띄어서 검색을 방해한다. 따라서 툴팁을 닫는다.
         try:
@@ -100,22 +105,13 @@ class MyBrowser(baseChrome.BaseChrome):
         except NoSuchElementException:
             pass
 
-        # try:
-        #     if driver.find_element('xpath','//span[@class="tourtip__overlay"]'):
-        #         print("Tooltip Element exists : tourtip__overlay")
-        #         sleep(2)
-        #         tooltip = driver.find_element('xpath','//span[@class="tourtip__overlay"]//button')
-        #         tooltip.click()
-        # except NoSuchElementException:
-        #     pass
-
  
         ## HTML 페이지 저장
-        with open('page.txt', 'w', encoding='utf-8') as f:
-            f.write(self.driver.page_source)
+        #with open('page.txt', 'w', encoding='utf-8') as f:
+        #    f.write(self.driver.page_source)
         
-        ## itemID 찾기
-        log.debug('>>> Search ItemID...')
+        ## itemID 찾기        
+        log.info('>>> Search ItemID...')
         soup = BeautifulSoup(self.driver.page_source, "html.parser")
         klist = self.get_itemid(soup, keyword, itemIDList)
         
@@ -152,6 +148,7 @@ class MyBrowser(baseChrome.BaseChrome):
 
         driver.switch_to.window(main_window)
         #log.info('Successfully Completed!!!')
+        self.scroll_to_top()
         
         return klist
         
@@ -160,24 +157,33 @@ class MyBrowser(baseChrome.BaseChrome):
     def get_itemid(self, soup, keyword, myitems):
         """
             HTML 파일로부터 item_id을 가져온다.
+            soup: BeautifulSoup 객체
+            keyword: 검색키워드
+            myitems: 내아이템 id
         """
         
-        item = []
+        item  = []
         klist = []
-        root  = soup.find('ul', class_="srp-results")
-        if self.check_exists_by_xpath('.su-card-container__header','css_selector'):
-            items = root.find_all("div", {"class": "su-card-container__header"})
-        else:
-            items = root.find_all("div", {"class": "s-item__image-section"})
+        root  = soup.find('ul', class_="srp-results") #ul.srp-results        
+        # if self.check_exists_by_xpath('.su-card-container__header','css_selector'):
+        #     items = root.find_all("div", {"class": "su-card-container__header"})
+        # else:
+        #     items = root.find_all("div", {"class": "s-item__image-section"})
+        items = root.select('li.s-item a.s-item__link')
         for i, itm in enumerate(items, start=1):
-            try:
-              href = itm.find('a').get('href')
+            #print('itm=',itm ,len(itm))
+            try:              
+              #href = itm.find('a').get('href')
+              href = itm.get('href')
               item.append(href)
             except Exception as e:
               pass
 
         #item = [ m.find('a').get('href') for m in root.find_all("div", {"class": "s-item__image-section"}) ]
-        #print(item ,len(item))
+        # print('ITEM=',item ,len(item))
+        # with open('test.log', 'w', encoding='utf-8') as f:
+        #     f.write(str(item))
+
 
         f = open('item.txt','a',encoding='utf-8')
         for i, id in enumerate(item, start=1):
@@ -189,10 +195,9 @@ class MyBrowser(baseChrome.BaseChrome):
                     print('Rank: {}\t{}\t({})'.format(keyword, mi, i))
                     klist.append([keyword, mi, i])
                     sleep(1)
-                #else:
-                #	log.debug('{} {}'.format(i, itno.group(1)))
         f.close()
-        
+        #print('KLIST=',klist ,len(klist))
+
         return klist
 
         
@@ -206,23 +211,21 @@ class MyBrowser(baseChrome.BaseChrome):
             item_url = 'https://www.ebay.com/itm/' + id
             print(item_url)
             try:
-                if self.check_exists_by_xpath('.su-card-container__header','css_selector'):
-                  link = driver.find_element('css selector','.su-card-container__content a[href^="' + item_url + '"]')
-                else:
-                  link = driver.find_element('css selector','a[href^="' + item_url + '"]')
-                #print(f'link={link}')
+                # if self.check_exists_by_xpath('.su-card-container__header','css_selector'):
+                #   link = driver.find_element('css selector','.su-card-container__content a[href^="' + item_url + '"]')
+                # else:
+                #   link = driver.find_element('css selector','a[href^="' + item_url + '"]')
             
+                link = driver.find_element('css selector','ul.srp-results li.s-item div.s-item__info a[href^="' + item_url + '"]')
                 if link.is_displayed():
-                    driver.execute_script("arguments[0].scrollIntoView();", link)
-                    if self.check_exists_by_xpath('.su-card-container__header','css_selector'):
-                      link2 = driver.find_element('css selector','.su-card-container__content a[href^="' + item_url + '"]')
-                    else:
-                      link2 = driver.find_elements('css selector','a[href^="' + item_url + '"]')[1]
-                    link2.send_keys('')
-                    #print('scrollIntoView')
-                    link2.click()
-                    #print('wait 3 seconds...')
-                    sleep(3)
+                    self.scroll_into_view(link)
+                    # if self.check_exists_by_xpath('.su-card-container__header','css_selector'):
+                    #   link2 = driver.find_element('css selector','.su-card-container__content a[href^="' + item_url + '"]')
+                    # else:
+                    #   link2 = driver.find_elements('css selector','a[href^="' + item_url + '"]')[1]
+                    link.send_keys('')
+                    link.click()
+                    sleep(5)
             
             except Exception as e:
                 log.error('%s %s' % (sys.exc_info()[0], sys.exc_info()[1]) )
@@ -240,15 +243,13 @@ class MyBrowser(baseChrome.BaseChrome):
         sleep(2)
         sort_box = WebDriverWait(driver, 10).until(EC.element_to_be_clickable(
             (By.XPATH, '//div[@class="srp-controls__sort srp-controls__control"]/div/span/button')))
-        action = ActionChains(driver)
-        self.human_like_mouse_move(action, sort_box)
+        #action = ActionChains(driver)
+        #self.human_like_mouse_move(action, sort_box)
         sort_box.click()
-        input('?')
         sleep(2)
-        log.debug('>>> 200 선택')
-        sleep(2)
-        item_200 = driver.find_element('xpath','//div[@class="srp-controls__sort srp-controls__control"]/div/span/span/ul/li[4]/a')
-        ActionChains(driver).move_to_element(item_200).click().perform()
+        # Sort: Price + Shipping: lowest first 선택
+        priceShip = driver.find_element('xpath',"//div[@class='srp-controls__sort srp-controls__control']//span[text()='Price + Shipping: lowest first']")
+        ActionChains(driver).move_to_element(priceShip).click().perform()
 
 
         

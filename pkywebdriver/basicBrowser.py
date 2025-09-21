@@ -92,13 +92,49 @@ class BasicBrowser():
         """
 
         result = WebDriverWait(driver, 30).until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
-        print('페이지 로딩 상태: {}'.format(result))
 
 
+
+    def open_url_new_tab(self, driver, url):
+        """
+            Open a link with new tab
+        """
+        # open new window
+        driver.execute_script("window.open('" + url +"');")
+    
+    
+    
+    def scroll_to_top(self):
+        ''' 브라우저의 TOP으로 이동 '''
+
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollTop);")
+
+    
     def scroll_into_view(self, element):
-        ''' element가 화면에 위치하도록 한다. block: center 중앙에 보이도록'''
+        '''element가 화면에 위치하도록 한다. block: center 중앙에 보이도록
+            되도록이면 디폴트 값을 사용할것 
+        '''
 
-        self.driver.execute_script('arguments[0].scrollIntoView({block: "center", behavior: "smooth"});', element)
+        #self.driver.execute_script('arguments[0].scrollIntoView({block: "center", behavior: "smooth", inline: "nearest"});', element)
+        #self.driver.execute_script("arguments[0].scrollIntoView(true);", element)
+        self.driver.execute_script('arguments[0].scrollIntoView({block: "center"});', element)
+        
+
+
+    def get_element_position(self, element):
+
+        # Get the element's bounding rectangle relative to the viewport
+        rect = self.driver.execute_script("return arguments[0].getBoundingClientRect();", element)
+
+        # Extract x, y, width, and height
+        x = rect['x']
+        y = rect['y']
+        width = rect['width']
+        height = rect['height']
+        print(x, y, width, height)
+
+        return x, y
+        
 
 
     def check_exists_by_xpath(self, xpath, method='xpath'):

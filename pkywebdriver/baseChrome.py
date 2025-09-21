@@ -27,7 +27,7 @@ from selenium.common.exceptions import NoSuchElementException
 import pickle
 import logging
 
-from . import basicBrowser
+from . import BasicBrowser
 
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -37,7 +37,7 @@ log = logging.getLogger(__name__)
 log.info("Logging Started... {}".format(__name__))
 
 
-class BaseChrome(basicBrowser.BasicBrowser):
+class BaseChrome(BasicBrowser.BasicBrowser):
 
     def __init__(self, config):
 
@@ -121,8 +121,8 @@ class BaseChrome(basicBrowser.BasicBrowser):
 
         if self.profile:
             profile_path = os.path.join(os.getcwd(), 'Chrome_Profiles', self.profile)
-            self.options.add_argument("user-data-dir=" + profile_path)
-            self.options.add_argument("--profile-directory=" + self.profile)
+            self.options.add_argument(f"--user-data-dir={profile_path}")
+            #self.options.add_argument("--profile-directory=" + self.profile)
         
         if self.proxy:            
             self.options.add_argument('--proxy-server={}'.format(self.proxy))            

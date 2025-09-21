@@ -1,3 +1,3 @@
 __version__ = '0.0.1'
 
-print('run pkywebdriver')
+print(__file__ + ' ==> run pkywebdriver')

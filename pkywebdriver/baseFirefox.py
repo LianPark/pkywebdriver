@@ -34,7 +34,7 @@ import shutil
 import pickle
 
 import logging
-from . import basicBrowser
+from . import BasicBrowser
 
 import subprocess
 
@@ -45,7 +45,7 @@ log.debug("Logging Started... {}".format(__name__))
 
 TYPING_SPEED = 0.1 # 0.1 의 경우 적합
 
-class BaseFirefox(basicBrowser.BasicBrowser):
+class BaseFirefox(BasicBrowser.BasicBrowser):
 
     def __init__(self, config):
 
@@ -91,10 +91,10 @@ class BaseFirefox(basicBrowser.BasicBrowser):
         #temp_dir = '/home/ubuntu/.mozilla/firefox/3uz1obam.default'
         #service = Service(GeckoDriverManager().install(),  service_args=['--profile-root', temp_dir])
 
-        if os.name == 'nt2':
+        if os.name == 'nt':
           service = Service(executable_path="./geckodriver.exe")
-          options = webdriver.FirefoxOptions()
-          self.driver = webdriver.Firefox(service=service, options=options)
+          #options = webdriver.FirefoxOptions(options=self.options)
+          self.driver = webdriver.Firefox(service=service, options=self.options)
         else:
           # Window Driver Location: C:\Users\[Username]\.wdm\drivers\geckodriver
           # Linux Location: ~/.wdm/drivers/geckodriver
@@ -103,7 +103,8 @@ class BaseFirefox(basicBrowser.BasicBrowser):
 
         # selenium 4용
         if self.extension:
-            self.driver.install_addon(r'/home/ubuntu/extension/browser@tunnelbear.com.xpi')
+            #self.driver.install_addon(r'/home/ubuntu/extension/browser@tunnelbear.com.xpi')
+            self.driver.install_addon(self.extension)
 
         return self.driver
   
@@ -153,7 +154,8 @@ class BaseFirefox(basicBrowser.BasicBrowser):
 
         if self.extension:
             # selenium 3에서만 동작  
-            self.options.add_extension(r'/home/ubuntu/extension/browser@tunnelbear.com.xpi')
+            #self.options.add_extension(r'/home/ubuntu/extension/browser@tunnelbear.com.xpi')
+            #self.driver.install_addon(self.extension)
             log.debug(f"loaded extension...")
         
         #self.options.set_preference('profile', 'C:\\Users\\LuckyMan\\AppData\\Local\\Temp\\rust_mozprofileRGVAx3')

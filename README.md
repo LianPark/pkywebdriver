@@ -31,7 +31,7 @@ python ebay-rank.py
 ## 패키지 배포
 로컬패키지를 github에 올리면 깃허브에서 자동을 PyPi사이트로 등록한다.
 
-git add .
-git commit -m 
-git tag v0.0.1
-git push origin tag
+git add .  
+git commit -m   
+git tag v0.0.1  
+git push origin <tag_number> 

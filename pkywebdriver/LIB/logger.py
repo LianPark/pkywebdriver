@@ -9,9 +9,9 @@ LOGGING_CONFIG = {
     'version': 1,
 	 'disable_existing_loggers': True,
     'loggers': {
-        'zz': {  # root logger
+        '': {  # root logger
             'level': 'NOTSET',
-            'handlers': ['console_handler', 'rotating_file_handler', 'error_file_handler', 'critical_mail_handler'],
+            'handlers': ['console_handler', 'rotating_file_handler'],  # , 'error_file_handler', 'critical_mail_handler'
         },
         'TEST': { 
             'level': 'DEBUG',
@@ -60,18 +60,18 @@ LOGGING_CONFIG = {
 		},
 		'info': {
 			'datefmt': '%H:%M:%S',
-			'format': '%(asctime)s-%(levelname)s-%(name)s::%(module)s|%(lineno)s:: %(message)s'
+			'format': '%(asctime)s-%(levelname)s-%(filename)s::%(module)s|%(lineno)s:: %(message)s'
 		},
 		'error': {
 			'datefmt': '%Y-%m-%d %H:%M:%S',
-			'format': '[%(asctime)s] %(name)s:%(lineno)s:%(levelname)s - %(message)s'
+			'format': '[%(asctime)s] %(filename)s:%(lineno)s:%(levelname)s - %(message)s'
 		},
 		'shortFormatter': {
-			'format': '%(name)s:%(lineno)s:%(levelname)s >>> %(message)s'
+			'format': '%(filename)s:%(lineno)s:%(levelname)s >>> %(message)s'
 		},
 		'fileFormatter': { # [2021-02-06 12:28:03] root:124:INFO -
 			'datefmt': '%Y-%m-%d %H:%M:%S',
-			'format': '[%(asctime)s] %(name)s:%(lineno)s:%(levelname)s - %(message)s'
+			'format': '[%(asctime)s] %(filename)s:%(lineno)s:%(levelname)s - %(message)s'
 			#'format': '%(asctime)-16s %(levelname)-8s %(filename)-s:%(lineno)-3s %(message)s'
 		},
 	},

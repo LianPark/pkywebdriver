@@ -27,7 +27,7 @@ from selenium.common.exceptions import NoSuchElementException
 import pickle
 import logging
 
-from . import BasicBrowser
+from . import basicBrowser
 
 from webdriver_manager.chrome import ChromeDriverManager
 
@@ -37,7 +37,7 @@ log = logging.getLogger(__name__)
 log.info("Logging Started... {}".format(__name__))
 
 
-class BaseChrome(BasicBrowser.BasicBrowser):
+class BaseChrome(basicBrowser.BasicBrowser):
 
     def __init__(self, config):
 

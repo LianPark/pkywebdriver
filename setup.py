@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pkywebdriver',
-    version='0.0.5',
+    version='0.0.6',
     description='selenium을 이용한 데이타 수집하기 위한 기본 브라우저 설정 - chrome, firefox 용',
     author='Lian Park',
     author_email='g1000white@gmail.com',

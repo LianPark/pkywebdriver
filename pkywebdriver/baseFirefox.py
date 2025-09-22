@@ -34,7 +34,7 @@ import shutil
 import pickle
 
 import logging
-from . import BasicBrowser
+from . import basicBrowser
 
 import subprocess
 
@@ -45,14 +45,9 @@ log.debug("Logging Started... {}".format(__name__))
 
 TYPING_SPEED = 0.1 # 0.1 의 경우 적합
 
-class BaseFirefox(BasicBrowser.BasicBrowser):
+class BaseFirefox(basicBrowser.BasicBrowser):
 
     def __init__(self, config):
-
-        # self.headless = headless
-        # self.options = None
-        # self.profile = profile
-        # self.capabilities = None
 
         self.driver     = None
         self.headless   = config['headless']
@@ -92,9 +87,10 @@ class BaseFirefox(BasicBrowser.BasicBrowser):
         #service = Service(GeckoDriverManager().install(),  service_args=['--profile-root', temp_dir])
 
         if os.name == 'nt':
-          service = Service(executable_path="./geckodriver.exe")
+          service = Service(executable_path=(GeckoDriverManager().install()))
           #options = webdriver.FirefoxOptions(options=self.options)
           self.driver = webdriver.Firefox(service=service, options=self.options)
+          #self.driver = webdriver.Firefox(executable_path=GeckoDriverManager().install())
         else:
           # Window Driver Location: C:\Users\[Username]\.wdm\drivers\geckodriver
           # Linux Location: ~/.wdm/drivers/geckodriver
@@ -113,14 +109,6 @@ class BaseFirefox(BasicBrowser.BasicBrowser):
     def setUpOptions(self):
         
         self.options = FirefoxOptions()
-        #if self.profile:
-        #	self.options.add_argument("-profile")
-        #	self.options.add_argument(r'C:\\Users\\LuckyMan\\AppData\\Local\\Temp\\rust_mozprofileRGVAx3')
-        # self.options.add_option('useAutomationExtension', False)
-        # self.options.log.level = "error"
-
-        # firefox binary 위치 설정
-        #options.binary_location = firefox_bin
 
         self.options.add_argument("--no-sandbox"); # Bypass OS security model
         self.options.add_argument("--disable-gpu"); # applicable to windows os only
@@ -128,12 +116,7 @@ class BaseFirefox(BasicBrowser.BasicBrowser):
         #self.options.add_argument("--disable-web-security")
         #self.options.add_argument("--allow-running-insecure-content")
         #self.options.add_argument("--ignore-certificate-errors")
-        
-        #firefox_profile = FirefoxProfile(r'/home/ubuntu/.mozilla/firefox/3uz1obam.default')
-        #firefox_profile.set_preference("javascript.enabled", False)
-        #self.options.profile = firefox_profile
-
-        
+                
         if self.headless:
             self.options.add_argument("--headless")
 
@@ -141,8 +124,14 @@ class BaseFirefox(BasicBrowser.BasicBrowser):
             self.options.add_argument('user-agent={0}'.format(self.user_agent))
 
         if self.profile:
-            self.options.add_argument("-profile")
-            self.options.add_argument(self.profile)
+            #self.options.add_argument("-profile")
+            #self.options.add_argument(self.profile)
+            # selenium 4
+            #self.options.profile = self.profile
+            #self.options.set_profile(self.profile)
+            #self.options.set_preference('profile', self.profile)
+            #firefox_options = Options()
+            self.options.add_argument(f"-profile={self.profile}")
         
         if self.proxy:            
             self.options.add_argument('--proxy-server={}'.format(self.proxy))
@@ -157,15 +146,6 @@ class BaseFirefox(BasicBrowser.BasicBrowser):
             #self.options.add_extension(r'/home/ubuntu/extension/browser@tunnelbear.com.xpi')
             #self.driver.install_addon(self.extension)
             log.debug(f"loaded extension...")
-        
-        #self.options.set_preference('profile', 'C:\\Users\\LuckyMan\\AppData\\Local\\Temp\\rust_mozprofileRGVAx3')
-        #self.options.set_preference('profile', 'C:\\Users\\LuckyMan\\AppData\\Local\\Temp\\rust_mozprofileRGVAx3')
-        #self.options.add_argument("user-data-dir=~/.mozilla/firefox/a0kvymyz.default-release") #Path to your firefox profile
-
-        #if self.profile:
-        #    self.options.add_argument("-profile")
-        #    self.options.add_argument(self.profile)
-
         
 
 

@@ -54,6 +54,10 @@ class BaseFirefox(basicBrowser.BasicBrowser):
         self.user_agent = None
         self.profile    = config['profile']
         self.extension  = config['extension']
+        try:
+            self.firefox_arm64 = config['firefox_arm64']
+        except KeyError:
+            self.firefox_arm64 = None
         if 'proxy' in config:
             self.proxy = config['proxy']
         else:
@@ -83,9 +87,6 @@ class BaseFirefox(basicBrowser.BasicBrowser):
         # log_output=subprocess.STDOUT, log_output='browser.log'
         # log_output=subprocess.STDOUT, service_args=['--log', 'error']
 
-        #temp_dir = '/home/ubuntu/.mozilla/firefox/3uz1obam.default'
-        #service = Service(GeckoDriverManager().install(),  service_args=['--profile-root', temp_dir])
-
         if os.name == 'nt':
           service = Service(executable_path=(GeckoDriverManager().install()))
           #options = webdriver.FirefoxOptions(options=self.options)
@@ -94,8 +95,12 @@ class BaseFirefox(basicBrowser.BasicBrowser):
         else:
           # Window Driver Location: C:\Users\[Username]\.wdm\drivers\geckodriver
           # Linux Location: ~/.wdm/drivers/geckodriver
-          service = Service(GeckoDriverManager().install())
-          self.driver = webdriver.Firefox(service=service, options=self.options)
+          if self.firefox_arm64:
+            service = Service(self.firefox_arm64)
+            self.driver = webdriver.Firefox(service=service, options=self.options)
+          else:             
+            service = Service(GeckoDriverManager().install())
+            self.driver = webdriver.Firefox(service=service, options=self.options)
 
         # selenium 4용
         if self.extension:
